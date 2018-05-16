@@ -27,7 +27,7 @@ public static class MapGenerator {
 					float sampleX = (x - size / 2) / scale * frequency + octaveOffset[i].x;
 					float sampleY = (y - size / 2) / scale * frequency + octaveOffset[i].y;
 
-					float perlinValue = Mathf.PerlinNoise (sampleX * frequency, sampleY * frequency) * amplitude;
+					float perlinValue = Mathf.PerlinNoise (sampleX * frequency, sampleY * frequency) * amplitude * 2 - 1;
 					value += perlinValue * amplitude;
 
 					amplitude *= persistence;

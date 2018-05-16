@@ -13,7 +13,11 @@ public class MapDisplayEditor : Editor {
 
 		if (DrawDefaultInspector ()) {
 			if (mapDisplay.autoUpdate) {
-				mapDisplay.GenerateTextureMap ();
+				if (mapDisplay.mode == MapDisplay.RenderMode.texture) {
+					mapDisplay.GenerateTextureMap ();
+				} else if (mapDisplay.mode == MapDisplay.RenderMode.mesh) {
+					mapDisplay.GenerateMeshMap ();
+				}
 			}
 		}
 		if (GUILayout.Button ("Generate Texture Map")) {
