@@ -4,55 +4,51 @@ using UnityEngine;
 
 public static class MapGenerator {
 
-	public static float[, ] GenerateMap (int size, int octaves, float lacunarity, float persistence) {
+	public static float[, ] GenerateMap (int size, float scale, int seed, int octaves, float lacunarity, float persistence, Vector2 offset) {
 		float[, ] map = new float[size, size];
-		for (int x = 0; x < size; x++) {
-			for (int y = 0; y < size; y++) {
-				for (int n = 0; n < octaves; n++) {
-					map[x, y] += Mathf.PerlinNoise (x / Mathf.Pow (lacunarity, n), y / Mathf.Pow (lacunarity, n)) * Mathf.Pow (persistence, n);
-				}
-			}
+
+		float maxValue = float.MinValue;
+		float minValue = float.MaxValue;
+
+		System.Random prng = new System.Random (seed);
+		Vector2[] octaveOffset = new Vector2[octaves];
+		for (int i = 0; i < octaves; i++) {
+			octaveOffset[i] = new Vector2 (prng.Next (-10000, 10000) + offset.x, prng.Next (-100000, 100000) + offset.y);
 		}
-		return map;
-	}
-	public static Color[] GeneratePixelMap (int size, float scale, int octaves, float lacunarity, float persistence) {
-		Color[] colorMap = new Color[size * size];
-		float[] map = new float[size * size];
-
-		var lowestValue = float.MaxValue;
-		var highestValue = float.MinValue;
-
+		//calculate values
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
 
 				float amplitude = 1;
 				float frequency = 1;
-				float noiseHeight = 0;
+				float value = 0;
 
-				for (int n = 0; n < octaves; n++) {
-					float sampleX = x / scale * frequency;
-					float sampleY = y / scale * frequency;
+				for (int i = 0; i < octaves; i++) {
+					float sampleX = (x - size / 2) / scale * frequency + octaveOffset[i].x;
+					float sampleY = (y - size / 2) / scale * frequency + octaveOffset[i].y;
 
-					float perlinValue = Mathf.PerlinNoise (sampleX, sampleY) * 2 - 1;
-					noiseHeight += perlinValue * amplitude;
+					float perlinValue = Mathf.PerlinNoise (sampleX * frequency, sampleY * frequency) * amplitude;
+					value += perlinValue * amplitude;
 
 					amplitude *= persistence;
 					frequency *= lacunarity;
 				}
-				if (noiseHeight < lowestValue)
-					lowestValue = noiseHeight;
-				else if (noiseHeight > highestValue)
-					highestValue = noiseHeight;
+				//Keeping track of min and max values
+				if (value < minValue)
+					minValue = value;
+				else if (value > maxValue)
+					maxValue = value;
 
-				map[x * size + y] = noiseHeight;
+				map[x, y] = value;
 			}
 		}
+		//normalize values
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
-				var value = Mathf.InverseLerp (lowestValue, highestValue, map[x * size + y]);
-				colorMap[x * size + y] = new Color (value, value, value);
+				map[x, y] = Mathf.InverseLerp (minValue, maxValue, map[x, y]);
 			}
 		}
-		return colorMap;
+
+		return map;
 	}
 }

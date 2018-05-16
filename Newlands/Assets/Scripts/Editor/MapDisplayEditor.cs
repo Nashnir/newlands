@@ -13,15 +13,13 @@ public class MapDisplayEditor : Editor {
 
 		if (DrawDefaultInspector ()) {
 			if (mapDisplay.autoUpdate) {
-				mapDisplay.GenerateMap ();
+				mapDisplay.GenerateTextureMap ();
 			}
 		}
-		if (GUILayout.Button ("Generate Map")) {
-			mapDisplay.GenerateMap ();
+		if (GUILayout.Button ("Generate Texture Map")) {
+			mapDisplay.GenerateTextureMap ();
+		} else if (GUILayout.Button ("Generate Mesh Map")) {
+			mapDisplay.GenerateMeshMap ();
 		}
-	}
-
-	public void Onvalidate () {
-
 	}
 }
