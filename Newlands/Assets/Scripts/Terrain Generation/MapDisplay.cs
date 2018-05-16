@@ -6,7 +6,8 @@ public class MapDisplay : MonoBehaviour {
 
 	[Header("Map Properties")]
 	public int seed;
-	public Vector2 offset;
+	public Vector2 octaveOffset;
+	public Vector2 mapOffset;
 	public int mapSize;
 	public float noiseScale;
 	public int octaves;
@@ -22,12 +23,18 @@ public class MapDisplay : MonoBehaviour {
 	[Header("Editor Properties")]
 	public RenderMode mode;
 	public bool autoUpdate;
+	public NormalizeMode normalizeMode;
 
 	private GameObject displayMesh;
+
+	private void Start() {
+		GenerateMeshMap();
+	}
 
 	private Texture2D TextureFromColorMap(Color[] colorMap) {
 		Texture2D texture = new Texture2D(mapSize, mapSize);
 		texture.SetPixels(colorMap);
+		texture.name = "generated_texture";
 		texture.Apply();
 		return texture;
 	}
@@ -50,7 +57,7 @@ public class MapDisplay : MonoBehaviour {
 		displayMesh.transform.localScale = new Vector3(mapSize, 1, mapSize);
 		displayMesh.transform.parent = transform;
 		//Texture creation
-		var map = MapGenerator.GenerateMap(mapSize, noiseScale, seed, octaves, lacunarity, persistence, offset);
+		var map = MapGenerator.GenerateMap(mapSize, noiseScale, seed, octaves, lacunarity, persistence, octaveOffset, mapOffset, normalizeMode);
 		Texture2D tex = TextureFromHeightMap(map);
 		displayMesh.GetComponent<Renderer>().sharedMaterial = Resources.Load<Material>("Materials/texture_material");
 		displayMesh.GetComponent<Renderer>().sharedMaterial.mainTexture = tex;
@@ -65,7 +72,7 @@ public class MapDisplay : MonoBehaviour {
 		displayMesh.transform.parent = transform;
 		displayMesh.transform.localScale = new Vector3(1f, 1f, 1f);
 
-		var map = MapGenerator.GenerateMap(mapSize, noiseScale, seed, octaves, lacunarity, persistence, offset);
+		var map = MapGenerator.GenerateMap(mapSize, noiseScale, seed, octaves, lacunarity, persistence, octaveOffset, mapOffset, normalizeMode);
 		Mesh mesh = new Mesh();
 		Vector3[] vertices = new Vector3[mapSize * mapSize];
 		int[] triangles = new int[(mapSize - 1) * (mapSize - 1) * 6];
@@ -132,6 +139,10 @@ public class MapDisplay : MonoBehaviour {
 	public enum RenderMode {
 		texture,
 		mesh
+	}
+	public enum NormalizeMode {
+		Local,
+		Global
 	}
 }
 
